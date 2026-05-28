@@ -1,0 +1,42 @@
+`include "./parts/memory.v"
+
+module IF(
+    clk,
+    res,
+    PCSource,
+    PCJumpAddr,
+    PC,
+    instruction,
+);
+    input clk, res;
+
+    input PCSource;
+    input [31:0] PCJumpAddr;
+
+    output reg[31:0] PC;
+    output wire[31:0] instruction;
+    
+
+    wire instr_mem_write;
+    assign instr_mem_write = 0;
+    
+    wire [31:0] data_in;
+    assign data_in = 32'b0;
+    memory instr_mem(
+        .clk(clk),
+        .addr_in(PC),
+        .mem_write(instr_mem_write),
+        .data_in(data_in),
+        .data_out(instruction)
+    );
+    
+    always @(posedge clk or posedge res) begin
+        if (res == 1)
+            PC <= 0;
+        else begin
+            PC <= PCSource ? PCJumpAddr : PC + 4;
+        end
+    end
+    
+
+endmodule
