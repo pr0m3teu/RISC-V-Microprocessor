@@ -16,7 +16,6 @@ module IF(
     output reg[31:0] PC;
     output wire[31:0] instruction;
     
-
     wire instr_mem_write;
     assign instr_mem_write = 0;
     
@@ -29,6 +28,14 @@ module IF(
         .data_in(data_in),
         .data_out(instruction)
     );
+
+    initial begin
+        instr_mem.mem[0] <= 8'hFF;
+        instr_mem.mem[1] <= 8'hEE;
+        instr_mem.mem[2] <= 8'hEC;
+        instr_mem.mem[3] <= 8'hEC;
+
+    end
     
     always @(posedge clk or posedge res) begin
         if (res == 1)
