@@ -24,9 +24,6 @@ module top(
         .instruction(instr)
     );
 
-    wire [4:0] rs1;
-    wire [4:0] rs2;
-    wire [4:0] rd;
     wire [31:0] imm32;
 
     reg[31:0] PC_IF_ID;
@@ -37,9 +34,6 @@ module top(
         .res(res),
         .input_instr(ISTR_IF_ID),
         .PC(PC_IF_ID),
-        .rs1(rs1),
-        .rs2(rs2),
-        .rd(rd),
         .imm32(imm32)
     );
 
