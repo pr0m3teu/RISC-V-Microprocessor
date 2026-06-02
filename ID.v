@@ -1,4 +1,5 @@
 `include "parts/registers.v"
+`include "parts/immgen.v"
 
 module ID(
     clk,
@@ -15,7 +16,7 @@ module ID(
 
     output wire [31:0] rd1;
     output wire [31:0] rd2;
-    output reg [31:0] imm32;
+    output wire [31:0] imm32;
     output reg [31:0] PC_out;
 
     // Needs to be handled by control path
@@ -30,6 +31,11 @@ module ID(
         .out_reg1(rd1),
         .out_reg2(rd2),
         .RegWrite(RegWrite)
+    );
+    
+    ImmGen imm_gen(
+        .instruction(input_instr),
+        .imm32(imm32)
     );
 
     always @(posedge clk) begin 
