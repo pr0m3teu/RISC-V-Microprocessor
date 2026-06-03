@@ -7,6 +7,8 @@ module ID(
     input_instr,
     PC,
     imm32,
+    rd1,
+    rd2,
     PC_out,
 );
 
