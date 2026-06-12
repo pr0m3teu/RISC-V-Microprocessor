@@ -26,7 +26,6 @@ module IF(
     wire [31:0] data_in;
     assign data_in = 32'b0;
     memory instr_mem(
-        .clk(clk),
         .addr_in(PC),
         .mem_write(instr_mem_write),
         .data_in(data_in),

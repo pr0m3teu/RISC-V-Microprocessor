@@ -20,6 +20,7 @@ module ID(
     wire RegWrite;
     assign RegWrite = 0;
 
+    // TODO: Add write data to registers file
     registers reg_file(
         .clk(clk),
         .rreg1(input_instr[19:15]),

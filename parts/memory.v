@@ -1,9 +1,9 @@
-module memory(clk, addr_in, mem_write, data_in, data_out);
+module memory(addr_in, mem_write, data_in, data_out);
     parameter WIDTH = 8;
     parameter ADDR_WIDTH = 10;
     parameter WORD = 32;
 
-    input clk, mem_write;
+    input  mem_write;
     input [WORD-1:0] addr_in;
     input wire [WORD-1:0] data_in;
 
@@ -11,7 +11,7 @@ module memory(clk, addr_in, mem_write, data_in, data_out);
 
     reg [WIDTH-1:0] mem [0:(1 << ADDR_WIDTH) - 1];
 
-    always @(posedge clk) begin
+    always @(*) begin
         if (mem_write) begin
             mem[addr_in] <= data_in[7:0];
             mem[addr_in + 1] <= data_in[15:8];
