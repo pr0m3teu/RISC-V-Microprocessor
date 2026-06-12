@@ -4,46 +4,57 @@
 module EX(
     clk,
     res,
-    rs1,
-    rs2,
+    din,
+    dout,
     ALUSrc,
     ALUControl,
-    imm32,
-    PC,
-    ALUResult,
-    Zero,
-    PCJmpAddress,
-    rs2_to_mem
 );
 
     input clk, res;
+
     input ALUSrc;
     input [3:0] ALUControl;
 
-    input [31:0] PC;
-    input [31:0] imm32;
-    input [31:0] rs1;
-    input [31:0] rs2;
+    // PC          = 127:96;
+    // Read data 1 = 95:64;
+    // Read data 2 = 63:32;
+    // Imm32       = 31: 0;
+    input [127:0] din;
 
-    output wire Zero;
-    output wire [31:0] ALUResult;
-    output wire [31:0] PCJmpAddress;
-    output wire [31:0] rs2_to_mem;
+    // Zero        = 96;
+    // New PC      = 95:64;
+    // ALU result  = 63:32;
+    // Read data 2 = 31: 0;
+    output reg [96:0] dout;
+
     
     wire [31:0] aluOpB;
-    assign aluOpB = ALUSrc ? imm32 : rs2;
+    assign aluOpB = ALUSrc ? din[31:0] : din[63:32];
 
+    wire [31:0] ALUResult;
+    wire Zero;
     ALU alu(
         .clk(clk),
         .res(res),
-        .src1(rs1),
+        .src1(din[95:64]),
         .src2(aluOpB),
         .ALUControl(ALUControl),
         .result(ALUResult),
         .zero(Zero)
     );
 
-    assign PCJmpAddress = PC + imm32;
-    assign rs2_to_mem = rs2;
+
+    always @(posedge clk) begin 
+        if (res) begin
+            dout <= 98'b0;
+        end
+        else begin
+            // TODO: Make sure these assignments are correct
+            dout[96]    <= Zero;
+            dout[95:64] <= din[127:96] + din[31:0];
+            dout[63:32] <= ALUResult;
+            dout[31:0]  <= din[63:32];
+        end
+    end
 
 endmodule
