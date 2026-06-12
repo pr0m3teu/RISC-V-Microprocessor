@@ -1,6 +1,7 @@
 `include "IF.v"
 `include "ID.v"
 `include "EX.v"
+`include "MEM.v"
 
 
 // TODO: Seperate data path logic to its own module
@@ -29,6 +30,11 @@ module top(
     reg [127:0] EX_MEM_REG;
 
 
+    // Read Data  = 63:32;
+    // ALU Result = 31:0;
+    reg [63:0] MEM_WB_REG;
+
+
     // TODO: Control signals;
     wire PCSource;
 
@@ -36,7 +42,7 @@ module top(
     wire [31:0] PCJumpAddr;
 
     assign PCSource = 0;
-    assign PCJumpAddr = 0;
+    assign PCJumpAddr = EX_MEM_REG[95:64];
 
     wire [63:0] IF_out;
     IF if_stage(
@@ -53,7 +59,6 @@ module top(
         .clk(clk),
         .res(res),
         .input_instr(IF_ID_REG[31:0]),
-        // Output
         .dout(ID_out)
     );
 
@@ -75,11 +80,27 @@ module top(
         .ALUControl(ALUControl)
     );
 
+    // TODO: Signal to be unhardcoded
+    wire MEMWrite;
+    assign MEMWrite = 0;
+    wire [63:0] MEM_out;
+    MEM mem_stage(
+        .din(EX_MEM_REG),
+        .dout(MEM_out),
+        .mem_write(MEMWrite)
+    );
+    
+    // TODO: Signal to be unhardcoded
+    wire MemToReg;
+    assign MemToReg = 0;
+    wire [31:0] WB_stage = MemToReg ? MEM_WB_REG[63:32] : MEM_WB_REG[31:0]; 
+
     always @(posedge clk or posedge res) begin
         if (res) begin
             IF_ID_REG  <=  64'b0;
             ID_EX_REG  <= 128'b0;
             EX_MEM_REG <= 97'b0;
+            MEM_WB_REG <= 64'b0;
 
         end
         else begin
@@ -92,6 +113,9 @@ module top(
 
             // EX/MEM
             EX_MEM_REG <= EX_out;
+
+            // MEM/WB
+            MEM_WB_REG <= MEM_out;
             
         end
     end
