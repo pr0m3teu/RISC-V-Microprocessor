@@ -5,23 +5,18 @@ module ID(
     clk,
     res,
     input_instr,
-    PC,
-    imm32,
-    rd1,
-    rd2,
-    PC_out,
+    dout 
 );
 
     input clk, res;
-    input [31:0] PC;
     input [31:0] input_instr;
 
-    output wire [31:0] rd1;
-    output wire [31:0] rd2;
-    output wire [31:0] imm32;
-    output reg [31:0] PC_out;
+    // Read data 1 = 95:64;
+    // Read data 2 = 63:32;
+    // Imm32       = 31: 0;
+    output wire [95:0] dout;
 
-    // Needs to be handled by control path
+    // TODO: Needs to be handled by control path
     wire RegWrite;
     assign RegWrite = 0;
 
@@ -30,19 +25,14 @@ module ID(
         .rreg1(input_instr[19:15]),
         .rreg2(input_instr[24:20]),
         .wreg(input_instr[11:7]),
-        .out_reg1(rd1),
-        .out_reg2(rd2),
+        .out_reg1(dout[95:64]),
+        .out_reg2(dout[63:32]),
         .RegWrite(RegWrite)
     );
     
     ImmGen imm_gen(
         .instruction(input_instr),
-        .imm32(imm32)
+        .imm32(dout[31:0])
     );
-
-    always @(posedge clk) begin 
-        PC_out <= PC;
-    end
-
 
 endmodule
