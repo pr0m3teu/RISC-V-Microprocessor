@@ -2,19 +2,25 @@
 `include "parts/immgen.v"
 
 module ID(
-    clk,
     res,
     input_instr,
+    write_dest,
+    write_data,
     dout 
 );
-
-    input clk, res;
+    input res;
     input [31:0] input_instr;
+    input [31:0] write_data;
+    input [4:0]  write_dest;
 
-    // Read data 1 = 95:64;
-    // Read data 2 = 63:32;
-    // Imm32       = 31: 0;
-    output wire [95:0] dout;
+    // Write reg   = 100:96;
+    // Read data 1 = 95 :64;
+    // Read data 2 = 63 :32;
+    // Imm32       = 31 : 0;
+    output wire [100:0] dout;
+
+    // Value of write reg
+    assign dout[100:96] = input_instr[11:7];
 
     // TODO: Needs to be handled by control path
     wire RegWrite;
@@ -22,13 +28,14 @@ module ID(
 
     // TODO: Add write data to registers file
     registers reg_file(
-        .clk(clk),
         .rreg1(input_instr[19:15]),
         .rreg2(input_instr[24:20]),
-        .wreg(input_instr[11:7]),
+        .wreg(write_dest),
+        .wdata(write_data),
         .out_reg1(dout[95:64]),
         .out_reg2(dout[63:32]),
-        .RegWrite(RegWrite)
+        .RegWrite(RegWrite),
+        .res(res)
     );
     
     ImmGen imm_gen(
