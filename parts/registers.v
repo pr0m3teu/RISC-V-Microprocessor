@@ -1,7 +1,7 @@
 // Register file module 
 
 module registers(
-   clk,
+   res,
    rreg1,
    rreg2,
    wreg,
@@ -14,9 +14,10 @@ module registers(
     parameter WIDTH = 32;
     parameter REG_COUNT = 32;
 
-    input clk;
+    // TODO: Make register file handle reset
+    input res;
     input [4:0] rreg1;
-    input [4:0] rreg2; // unhardcode the sizes
+    input [4:0] rreg2; // TODO: unhardcode the sizes
     input [4:0] wreg;
 
     input RegWrite;
@@ -37,7 +38,7 @@ module registers(
         regs[0] = 32'b0;
     end
 
-    always @(posedge clk) begin
+    always @(*) begin
         regs[0] <= 32'b0;
         if (RegWrite)
             regs[wreg] <= wdata;
