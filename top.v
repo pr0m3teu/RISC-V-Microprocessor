@@ -50,19 +50,19 @@ module top(
 
 
     // TODO: Control signals;
-    wire PCSource;
+    wire PCSrc;
 
     // TODO: Once EX/MEM is complete this should be removed
     wire [31:0] PCJumpAddr;
 
-    assign PCSource = 0;
+    assign PCSrc= 0;
     assign PCJumpAddr = EX_MEM_REG[95:64];
 
     wire [63:0] IF_out;
     IF if_stage(
         .clk(clk),
         .res(res),
-        .PCSource(PCSource),
+        .PCSrc(PCSrc),
         .PCJumpAddr(PCJumpAddr),
         .dout(IF_out)
     );
@@ -96,13 +96,13 @@ module top(
     );
 
     // TODO: Signal to be unhardcoded
-    wire MEMWrite;
-    assign MEMWrite = 0;
+    wire MemWrite;
+    assign MemWrite = 0;
     wire [68:0] MEM_out;
     MEM mem_stage(
         .din(EX_MEM_REG),
         .dout(MEM_out),
-        .mem_write(MEMWrite)
+        .MemWrite(MemWrite)
     );
     
     
@@ -114,13 +114,14 @@ module top(
             MEM_WB_REG <= 69'b0;
 
         end
+        // TODO: Unhardcode the values of these pins for all regsiters asap
         else begin
             // IF/ID
             IF_ID_REG <= IF_out;
 
             // ID/EX
-            // TODO: Unhardcode the values of these pins for all regsiters asap
             ID_EX_REG[95:0]    <= ID_out[95:0];
+            //PC
             ID_EX_REG[127:96]  <= IF_ID_REG[63:32];
             ID_EX_REG[132:128] <= ID_out[100:96];
 

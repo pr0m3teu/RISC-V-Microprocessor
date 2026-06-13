@@ -3,8 +3,9 @@
 
 module MEM(
     din,
-    mem_write,
     dout,
+    MemRead,
+    MemWrite
 );
 
     // Write reg   = 101:97;
@@ -19,13 +20,14 @@ module MEM(
     // ALU Result = 31:0;
     output [68:0] dout;
 
-    input mem_write;
+    input MemWrite, MemRead;
 
     memory data_mem(
        .addr_in(din[63:32]),
-       .mem_write(mem_write),
        .data_in(din[31:0]),
-       .data_out(dout[63:32])
+       .data_out(dout[63:32]),
+       .MemWrite(MemWrite),
+       .MemRead(MemRead)
     );
 
     assign dout[63:32] = din[63:32];

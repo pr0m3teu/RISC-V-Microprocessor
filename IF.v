@@ -3,13 +3,13 @@
 module IF(
     clk,
     res,
-    PCSource,
+    PCSrc,
     PCJumpAddr,
     dout
 );
     input clk, res;
 
-    input PCSource;
+    input PCSrc;
     input [31:0] PCJumpAddr;
 
      // PC    = 63:32
@@ -19,17 +19,22 @@ module IF(
     reg[31:0] PC;
     wire[31:0] instruction;
     
-    // TODO: Control signals should be input
+    // For instruction memory this should always be deasserted
     wire instr_mem_write;
     assign instr_mem_write = 0;
-    
+
+    // For instruction memory this should always be asserted
+    wire instr_mem_read;
+    assign instr_mem_read = 1;
+
     wire [31:0] data_in;
     assign data_in = 32'b0;
     memory instr_mem(
         .addr_in(PC),
-        .mem_write(instr_mem_write),
         .data_in(data_in),
-        .data_out(instruction)
+        .data_out(instruction),
+        .MemWrite(instr_mem_write),
+        .MemRead(instr_mem_read)
     );
 
     initial begin
@@ -44,10 +49,11 @@ module IF(
         if (res == 1)
             PC <= 0;
         else begin
-            PC <= PCSource ? PCJumpAddr : PC + 4;
+            PC <= PCSrc? PCJumpAddr : PC + 4;
         end
     end
 
+    // TODO: Check if this is correct?
     always @(PC or instruction) begin
         dout[63:32] <= PC;
         dout[31:0]  <= instruction;
