@@ -2,6 +2,7 @@
 `include "ID.v"
 `include "EX.v"
 `include "MEM.v"
+`include "control_path.v"
 
 
 // TODO: Seperate data path logic to its own module
@@ -10,6 +11,11 @@ module top(
     res
 );
     input clk, res;
+
+    // Control Wires
+    wire [1:0] ALUOp;
+    wire ALUSrc, Branch, MemRead, MemWrite, RegWrite, MemToReg;
+
 
     // PC    = 63:32
     // Instr = 31:0
@@ -38,32 +44,68 @@ module top(
     reg [68:0] MEM_WB_REG;
     
 
-    // TODO: Signal to be unhardcoded
-    wire MemToReg;
-    assign MemToReg = 0;
-
     // Write reg  = 36:34;
     // Write data = 31: 0;
     wire [36:0] WB_stage;
-    assign WB_stage[31:0] = MemToReg ? MEM_WB_REG[63:32] : MEM_WB_REG[31:0]; 
+    assign WB_stage[31:0]  = MemToReg ? MEM_WB_REG[63:32] : MEM_WB_REG[31:0]; 
     assign WB_stage[36:32] = MEM_WB_REG[68:64];
 
 
-    // TODO: Control signals;
+
+    // Control Path
+    ///////////////////////////////////////////////////////////
+
+    wire [7:0] ctl_signals;
+    ControlPath control(
+        .clk(clk),
+        .instr(IF_ID_REG[31:0]),
+        .ctl_signals(ctl_signals)
+    );
+    
+    // { ALUOp[1:0], ALUSrc, Branch, MemRead, MemWrite, RegWrite, MemToReg }; 
+    reg [7:0] ID_EX_CTL;
+    
+    // { Branch, MemRead, MemWrite, RegWrite, MemToReg }; 
+    reg [4:0] EX_MEM_CTL;
+    
+    // { RegWrite, MemToReg }; 
+    reg [1:0] MEM_WB_CTL;
+
+    always @(posedge clk or posedge res) begin
+        if (res) begin
+            ID_EX_CTL  <= 8'b0;
+            EX_MEM_CTL <= 5'b0;
+            MEM_WB_CTL <= 2'b0;
+        end
+        else begin 
+            ID_EX_CTL  <= ctl_signals;
+            EX_MEM_CTL <= ID_EX_CTL[4:0];
+            MEM_WB_CTL <= EX_MEM_CTL[1:0];
+        end
+    end
+
+    assign ALUOp    = ID_EX_CTL[7:6];
+    assign ALUSrc   = ID_EX_CTL[5];
+
+    assign Branch   = EX_MEM_CTL[4];
+    assign MemRead  = EX_MEM_CTL[3];
+    assign MemWrite = EX_MEM_CTL[2];
+
+    assign RegWrite = MEM_WB_CTL[1];
+    assign MemToReg = MEM_WB_CTL[0];
+    ///////////////////////////////////////////////////////////
+
     wire PCSrc;
-
-    // TODO: Once EX/MEM is complete this should be removed
-    wire [31:0] PCJumpAddr;
-
-    assign PCSrc= 0;
-    assign PCJumpAddr = EX_MEM_REG[95:64];
+    wire Zero;
+    assign Zero = EX_MEM_REG[96];
+    assign PCSrc = Zero & Branch;
 
     wire [63:0] IF_out;
     IF if_stage(
         .clk(clk),
         .res(res),
         .PCSrc(PCSrc),
-        .PCJumpAddr(PCJumpAddr),
+        .PCJumpAddr(EX_MEM_REG[95:64]),
         .dout(IF_out)
     );
 
@@ -74,16 +116,12 @@ module top(
         .input_instr(IF_ID_REG[31:0]),
         .write_dest(WB_stage[36:32]),
         .write_data(WB_stage[31:0]),
-        .dout(ID_out)
+        .dout(ID_out),
+        .RegWrite(RegWrite)
     );
 
-
     // TODO: Make controll signals input from control path
-    wire ALUSrc;
-    assign ALUSrc = 0;
     wire [3:0] ALUControl;
-    wire [31:0] ALUResult;
-
 
     wire [101:0] EX_out;
     EX ex_stage(
@@ -96,13 +134,12 @@ module top(
     );
 
     // TODO: Signal to be unhardcoded
-    wire MemWrite;
-    assign MemWrite = 0;
     wire [68:0] MEM_out;
     MEM mem_stage(
         .din(EX_MEM_REG),
         .dout(MEM_out),
-        .MemWrite(MemWrite)
+        .MemWrite(MemWrite),
+        .MemRead(MemRead)
     );
     
     
@@ -111,7 +148,7 @@ module top(
             IF_ID_REG  <=  64'b0;
             ID_EX_REG  <= 133'b0;
             EX_MEM_REG <= 102'b0;
-            MEM_WB_REG <= 69'b0;
+            MEM_WB_REG <=  69'b0;
 
         end
         // TODO: Unhardcode the values of these pins for all regsiters asap

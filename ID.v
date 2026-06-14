@@ -6,9 +6,11 @@ module ID(
     input_instr,
     write_dest,
     write_data,
-    dout 
+    dout,
+    RegWrite
 );
     input res;
+    input RegWrite;
     input [31:0] input_instr;
     input [31:0] write_data;
     input [4:0]  write_dest;
@@ -22,11 +24,6 @@ module ID(
     // Value of write reg
     assign dout[100:96] = input_instr[11:7];
 
-    // TODO: Needs to be handled by control path
-    wire RegWrite;
-    assign RegWrite = 0;
-
-    // TODO: Add write data to registers file
     registers reg_file(
         .rreg1(input_instr[19:15]),
         .rreg2(input_instr[24:20]),
