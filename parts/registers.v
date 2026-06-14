@@ -39,8 +39,8 @@ module registers(
     end
 
     always @(*) begin
-        regs[0] <= 32'b0;
-        if (RegWrite)
+        regs[0] <= 32'b0; // Maybe this is redundant
+        if (RegWrite && wreg != 5'b0)
             regs[wreg] <= wdata;
     end
 

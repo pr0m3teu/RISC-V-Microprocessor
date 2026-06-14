@@ -7,13 +7,15 @@ module ControlPath(
     input clk;
     input [31:0] instr;
 
+    wire [6:0] opcode;
+    assign opcode = instr[6:0];
     
     // { ALUOp[1:0], ALUSrc, Branch, MemRead, MemWrite, RegWrite, MemToReg }; 
  
     output reg [7:0] ctl_signals;
 
     always @(posedge clk) begin
-        casex(instr[6:0]) 
+        casex(opcode) 
             // R-Type
             7'b0110011: ctl_signals <= 8'b10_0_0_0_0_1_0;
             // TODO: Add I-Type

@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 `include "IF.v"
 `include "ID.v"
 `include "EX.v"
@@ -93,6 +95,7 @@ module top(
 
     assign RegWrite = MEM_WB_CTL[1];
     assign MemToReg = MEM_WB_CTL[0];
+
     ///////////////////////////////////////////////////////////
 
     wire PCSrc;
