@@ -96,6 +96,20 @@ module top(
     assign RegWrite = MEM_WB_CTL[1];
     assign MemToReg = MEM_WB_CTL[0];
 
+    // ALU Control unit
+    reg [3:0] ALUControl;
+    always @(ALUOp or ID_EX_REG[14:12] or ID_EX_REG[6:0]) begin
+        case ({ ALUOp, ID_EX_REG[14:12], ID_EX_REG[6:0] })
+            12'b00_xxx_xxxxxxx: ALUControl <= 4'b0010;
+            12'b01_xxx_xxxxxxx: ALUControl <= 4'b0110;
+            12'b10_000_0000000: ALUControl <= 4'b0010;
+            12'b10_000_0100000: ALUControl <= 4'b0110;
+            12'b10_111_0100000: ALUControl <= 4'b0000;
+            12'b10_110_0100000: ALUControl <= 4'b0001;
+            default: ALUControl <= 4'b1111; // Cause ERROR
+        endcase
+    end
+
     ///////////////////////////////////////////////////////////
 
     wire PCSrc;
@@ -123,8 +137,6 @@ module top(
         .RegWrite(RegWrite)
     );
 
-    // TODO: Make controll signals input from control path
-    wire [3:0] ALUControl;
 
     wire [101:0] EX_out;
     EX ex_stage(

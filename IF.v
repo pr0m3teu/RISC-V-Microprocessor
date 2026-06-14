@@ -36,14 +36,14 @@ module IF(
         .MemWrite(instr_mem_write),
         .MemRead(instr_mem_read)
     );
-
-    initial begin
-        instr_mem.mem[0] <= 8'hFF;
-        instr_mem.mem[1] <= 8'hEE;
-        instr_mem.mem[2] <= 8'hEC;
-        instr_mem.mem[3] <= 8'hEC;
-    end
     
+    integer i;
+    initial begin
+        $readmemh("instr_mem.mem", instr_mem.mem);
+        for (i = 0; i < 10; i++) begin 
+            $display("mem[%0d]: 0x%0h", i, instr_mem.mem[i]);
+        end
+    end
 
     always @(posedge clk or posedge res) begin
         if (res == 1)
