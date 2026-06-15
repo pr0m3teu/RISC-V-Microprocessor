@@ -99,8 +99,17 @@ module top(
 
     // ALU Control unit
     reg [3:0] ALUControl;
-    always @(posedge clk or ALUOp or ID_EX_INSTR[14:12] or ID_EX_INSTR[6:0]) begin
-        case ({ ALUOp, ID_EX_INSTR[14:12], ID_EX_INSTR[6:0] })
+    reg [6:0] funct7;
+    always @(posedge clk or ALUOp or ID_EX_INSTR[14:12] or ID_EX_INSTR[31:25]) begin
+
+        // TODO: Extend logic to check funct3 as well for more complex instr
+        case(ID_EX_INSTR[6:0])
+            7'b0010011: funct7 <= 7'b0;
+
+            default: funct7 <= ID_EX_INSTR[31:25];
+        endcase
+
+        casex ({ ALUOp, ID_EX_INSTR[14:12], funct7 })
             12'b00_xxx_xxxxxxx: ALUControl <= 4'b0010;
             12'b01_xxx_xxxxxxx: ALUControl <= 4'b0110;
             12'b10_000_0000000: ALUControl <= 4'b0010;

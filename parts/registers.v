@@ -14,7 +14,6 @@ module registers(
     parameter WIDTH = 32;
     parameter REG_COUNT = 32;
 
-    // TODO: Make register file handle reset
     input res;
     input [4:0] rreg1;
     input [4:0] rreg2; // TODO: unhardcode the sizes
@@ -38,10 +37,17 @@ module registers(
         regs[0] = 32'b0;
     end
 
+    integer i;
     always @(*) begin
+        if (res) begin
+            for (i = 0; i < REG_COUNT; i++) begin 
+                regs[i] = 32'b0; // TODO: Unhardcode this value
+            end
+        end
+
         regs[0] <= 32'b0; // Maybe this is redundant
         if (RegWrite && wreg != 5'b0)
             regs[wreg] <= wdata;
-    end
 
+    end
 endmodule
