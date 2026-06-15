@@ -30,7 +30,12 @@ module MEM(
        .MemRead(MemRead)
     );
 
-    assign dout[63:32] = din[63:32];
+    // for now read the same memory as instruction memory
+    initial begin
+        $readmemh("instr_mem.mem", data_mem.mem);
+    end
+
     assign dout[68:64] = din[101:97];
+    assign dout[31:0]  = din[63: 32];
 
 endmodule

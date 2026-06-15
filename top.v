@@ -30,6 +30,7 @@ module top(
     // Read data 2 = 63:32;
     // Imm32       = 31: 0;
     reg [132:0] ID_EX_REG;
+    reg [31: 0] ID_EX_INSTR;
 
 
     // Write reg   = 101:97;
@@ -98,8 +99,8 @@ module top(
 
     // ALU Control unit
     reg [3:0] ALUControl;
-    always @(ALUOp or ID_EX_REG[14:12] or ID_EX_REG[6:0]) begin
-        case ({ ALUOp, ID_EX_REG[14:12], ID_EX_REG[6:0] })
+    always @(posedge clk or ALUOp or ID_EX_INSTR[14:12] or ID_EX_INSTR[6:0]) begin
+        case ({ ALUOp, ID_EX_INSTR[14:12], ID_EX_INSTR[6:0] })
             12'b00_xxx_xxxxxxx: ALUControl <= 4'b0010;
             12'b01_xxx_xxxxxxx: ALUControl <= 4'b0110;
             12'b10_000_0000000: ALUControl <= 4'b0010;
@@ -148,7 +149,7 @@ module top(
         .ALUControl(ALUControl)
     );
 
-    // TODO: Signal to be unhardcoded
+
     wire [68:0] MEM_out;
     MEM mem_stage(
         .din(EX_MEM_REG),
@@ -175,7 +176,10 @@ module top(
             ID_EX_REG[95:0]    <= ID_out[95:0];
             //PC
             ID_EX_REG[127:96]  <= IF_ID_REG[63:32];
+            // Write reg
             ID_EX_REG[132:128] <= ID_out[100:96];
+
+            ID_EX_INSTR <= IF_ID_REG[31:0];
 
             // EX/MEM
             EX_MEM_REG <= EX_out;

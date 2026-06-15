@@ -18,7 +18,8 @@ module ControlPath(
         casex(opcode) 
             // R-Type
             7'b0110011: ctl_signals <= 8'b10_0_0_0_0_1_0;
-            // TODO: Add I-Type
+            // I-Type
+            7'b0010011: ctl_signals <= 8'b10_1_0_0_0_1_0;
             // lw
             7'b0000011: ctl_signals <= 8'b00_1_0_1_0_1_1;
             // sw
