@@ -28,7 +28,7 @@ module EX(
     // New PC      = 95:64;
     // ALU result  = 63:32;
     // Read data 2 = 31: 0;
-    output reg [101:0] dout;
+    output [101:0] dout;
 
     
     wire [31:0] aluOpB;
@@ -48,21 +48,11 @@ module EX(
         $monitor("[ALUResult]  time = %0t, value = 0x%0h", $time, ALUResult);
         $monitor("[ALUControl] time = %0t, value = 0x%0h", $time, ALUControl);
     end
-
-    always @(posedge clk) begin 
-        if (res) begin
-            dout <= 102'b0;
-        end
-        else begin
-            // TODO: Make sure these assignments are correct
-            dout[101:97]<= din[132:128];
-            dout[96]    <= Zero;
-            // PC + Imm32
-            dout[95:64] <= din[127:96] + din[31:0];
-
-            dout[63:32] <= ALUResult;
-            dout[31:0]  <= din[63:32];
-        end
-    end
+    assign dout[101:97] = din[132:128];          // Write reg
+    assign dout[96]     = Zero;                  // Zero flag
+    assign dout[95:64]  = din[127:96] + din[31:0]; // Branch target: PC + Imm32
+    assign dout[63:32]  = ALUResult;             // ALU result
+    assign dout[31:0]   = din[63:32];            // Read data 2 (for sw)
 
 endmodule
+

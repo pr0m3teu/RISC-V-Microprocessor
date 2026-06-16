@@ -60,7 +60,6 @@ module top(
 
     wire [7:0] ctl_signals;
     ControlPath control(
-        .clk(clk),
         .instr(IF_ID_REG[31:0]),
         .ctl_signals(ctl_signals)
     );
@@ -104,19 +103,19 @@ module top(
 
         // TODO: Extend logic to check funct3 as well for more complex instr
         case(ID_EX_INSTR[6:0])
-            7'b0010011: funct7 <= 7'b0;
+            7'b0010011: funct7 = 7'b0;
 
-            default: funct7 <= ID_EX_INSTR[31:25];
+            default: funct7 = ID_EX_INSTR[31:25];
         endcase
 
         casex ({ ALUOp, ID_EX_INSTR[14:12], funct7 })
-            12'b00_xxx_xxxxxxx: ALUControl <= 4'b0010;
-            12'b01_xxx_xxxxxxx: ALUControl <= 4'b0110;
-            12'b10_000_0000000: ALUControl <= 4'b0010;
-            12'b10_000_0100000: ALUControl <= 4'b0110;
-            12'b10_111_0100000: ALUControl <= 4'b0000;
-            12'b10_110_0100000: ALUControl <= 4'b0001;
-            default: ALUControl <= 4'b1111; // Cause ERROR
+            12'b00_xxx_xxxxxxx: ALUControl = 4'b0010;
+            12'b01_xxx_xxxxxxx: ALUControl = 4'b0110;
+            12'b10_000_0000000: ALUControl = 4'b0010;
+            12'b10_000_0100000: ALUControl = 4'b0110;
+            12'b10_111_0000000: ALUControl = 4'b0000;
+            12'b10_110_0000000: ALUControl = 4'b0001;
+            default: ALUControl = 4'b1111; // Cause ERROR
         endcase
     end
 
@@ -139,6 +138,7 @@ module top(
    
     wire [100:0] ID_out;
     ID id_stage(
+        .clk(clk),
         .res(res),
         .input_instr(IF_ID_REG[31:0]),
         .write_dest(WB_stage[36:32]),

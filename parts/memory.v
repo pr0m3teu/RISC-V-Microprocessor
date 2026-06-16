@@ -28,11 +28,13 @@ module memory(clk, addr_in, data_in, data_out, MemWrite, MemRead);
     // asynchronous reads
     always @(*) begin
         if (MemRead) begin
-            data_out[7:0]   <= mem[addr_in];
-            data_out[15:8]  <= mem[addr_in + 1];
-            data_out[23:16] <= mem[addr_in + 2];
-            data_out[31:24] <= mem[addr_in + 3];
+            data_out[7:0]   = mem[addr_in];
+            data_out[15:8]  = mem[addr_in + 1];
+            data_out[23:16] = mem[addr_in + 2];
+            data_out[31:24] = mem[addr_in + 3];
         end
+        else 
+            data_out = 32'bx;
     end
 
 endmodule

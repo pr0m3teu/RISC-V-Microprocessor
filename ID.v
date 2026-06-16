@@ -2,6 +2,7 @@
 `include "parts/immgen.v"
 
 module ID(
+    clk,
     res,
     input_instr,
     write_dest,
@@ -9,7 +10,7 @@ module ID(
     dout,
     RegWrite
 );
-    input res;
+    input clk, res;
     input RegWrite;
 
     input [31:0] input_instr;
