@@ -13,7 +13,14 @@ module ImmGen(
            7'b1100111,
            7'b1110011: imm32 = { {20{instruction[31]}}, instruction[31:20] }; // I-Type
            7'b0100011: imm32 = { {20{instruction[31]}}, instruction[31:25], instruction[11:7] }; // S-Type
-           7'b1100011: imm32 = { {20{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8] }; // B-Type
+           7'b1100011: imm32 = 
+                        { {19{instruction[31]}},
+                          instruction[31],
+                          instruction[7],
+                          instruction[30:25],
+                          instruction[11:8],
+                          1'b0 };
+
            default: imm32 = 32'h0000_0000;
        endcase
    end

@@ -32,13 +32,11 @@ module EX(
 
     
     wire [31:0] aluOpB;
-    assign aluOpB = ALUSrc ? din[31:0] : din[63:32];
+    assign aluOpB = (ALUSrc) ? din[31:0] : din[63:32];
 
     wire [31:0] ALUResult;
     wire Zero;
     ALU alu(
-        .clk(clk),
-        .res(res),
         .src1(din[95:64]),
         .src2(aluOpB),
         .ALUControl(ALUControl),
@@ -46,16 +44,22 @@ module EX(
         .zero(Zero)
     );
 
+    initial begin
+        $monitor("[ALUResult]  time = %0t, value = 0x%0h", $time, ALUResult);
+        $monitor("[ALUControl] time = %0t, value = 0x%0h", $time, ALUControl);
+    end
 
     always @(posedge clk) begin 
         if (res) begin
-            dout <= 98'b0;
+            dout <= 102'b0;
         end
         else begin
             // TODO: Make sure these assignments are correct
             dout[101:97]<= din[132:128];
             dout[96]    <= Zero;
+            // PC + Imm32
             dout[95:64] <= din[127:96] + din[31:0];
+
             dout[63:32] <= ALUResult;
             dout[31:0]  <= din[63:32];
         end

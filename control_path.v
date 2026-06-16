@@ -14,7 +14,7 @@ module ControlPath(
  
     output reg [7:0] ctl_signals;
 
-    always @(posedge clk) begin
+    always @(*) begin
         casex(opcode) 
             // R-Type
             7'b0110011: ctl_signals <= 8'b10_0_0_0_0_1_0;
