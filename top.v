@@ -5,6 +5,8 @@
 `include "EX.v"
 `include "MEM.v"
 `include "control_path.v"
+`include "hazard_detection.v"
+`include "forwarding_unit.v"
 
 
 // TODO: Seperate data path logic to its own module
@@ -54,6 +56,12 @@ module top(
     assign WB_stage[36:32] = MEM_WB_REG[68:64];
 
 
+    // Hazard Detection Signals
+    wire PCWrite;
+    wire IF_ID_Write;
+    wire Stall;
+
+
 
     // Control Path
     ///////////////////////////////////////////////////////////
@@ -80,7 +88,11 @@ module top(
             MEM_WB_CTL <= 2'b0;
         end
         else begin 
-            ID_EX_CTL  <= ctl_signals;
+            if (Stall) begin 
+                ID_EX_CTL <= 8'b0;
+            end else begin
+                ID_EX_CTL  <= ctl_signals;
+            end
             EX_MEM_CTL <= ID_EX_CTL[4:0];
             MEM_WB_CTL <= EX_MEM_CTL[1:0];
         end
@@ -121,6 +133,16 @@ module top(
 
     ///////////////////////////////////////////////////////////
 
+    HazardDetectionUnit hdu(
+        .ID_EX_MemRead(ID_EX_CTL[3]),      
+        .ID_EX_Rd(ID_EX_REG[132:128]),     
+        .IF_ID_Rs1(IF_ID_REG[19:15]),      
+        .IF_ID_Rs2(IF_ID_REG[24:20]),      
+        .PCWrite(PCWrite),
+        .IF_ID_Write(IF_ID_Write),
+        .Stall(Stall)
+    );
+
     wire PCSrc;
     wire Zero;
     assign Zero = EX_MEM_REG[96];
@@ -132,6 +154,7 @@ module top(
         .res(res),
         .PCSrc(PCSrc),
         .PCJumpAddr(EX_MEM_REG[95:64]),
+        .PCWrite(PCWrite),
         .dout(IF_out)
     );
 
@@ -148,11 +171,46 @@ module top(
     );
 
 
+    // Forwarding Logic
+    wire [1:0] ForwardA;
+    wire [1:0] ForwardB;
+
+    ForwardingUnit fu(
+        .ID_EX_Rs1(ID_EX_INSTR[19:15]),
+        .ID_EX_Rs2(ID_EX_INSTR[24:20]),
+        .EX_MEM_Rd(EX_MEM_REG[101:97]),
+        .EX_MEM_RegWrite(EX_MEM_CTL[1]),   
+        .MEM_WB_Rd(MEM_WB_REG[68:64]),
+        .MEM_WB_RegWrite(MEM_WB_CTL[1]),   
+        .ForwardA(ForwardA),
+        .ForwardB(ForwardB)
+    );
+
+    wire [31:0] forwarded_A;
+    wire [31:0] forwarded_B;
+    
+    assign forwarded_A = (ForwardA == 2'b10) ? EX_MEM_REG[63:32] : // EX Hazard
+                         (ForwardA == 2'b01) ? WB_stage[31:0]    : // MEM Hazard
+                         ID_EX_REG[95:64];                         // No Hazard (Read Data 1)
+
+    assign forwarded_B = (ForwardB == 2'b10) ? EX_MEM_REG[63:32] : // EX Hazard
+                         (ForwardB == 2'b01) ? WB_stage[31:0]    : // MEM Hazard
+                         ID_EX_REG[63:32];                         // No Hazard (Read Data 2)
+
+
+    wire [132:0] EX_stage_din;
     wire [101:0] EX_out;
+
+    assign EX_stage_din[132:128] = ID_EX_REG[132:128]; 
+    assign EX_stage_din[127:96]  = ID_EX_REG[127:96];  
+    assign EX_stage_din[95:64]   = forwarded_A;        
+    assign EX_stage_din[63:32]   = forwarded_B;        
+    assign EX_stage_din[31:0]    = ID_EX_REG[31:0];    
+
     EX ex_stage(
         .clk(clk),
         .res(res),
-        .din(ID_EX_REG),
+        .din(EX_stage_din),
         .dout(EX_out),
         .ALUSrc(ALUSrc),
         .ALUControl(ALUControl)

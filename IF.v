@@ -5,10 +5,11 @@ module IF(
     res,
     PCSrc,
     PCJumpAddr,
+    PCWrite,
     dout
 );
     input clk, res;
-
+    input PCWrite;
     input PCSrc;
     input [31:0] PCJumpAddr;
 
@@ -49,8 +50,8 @@ module IF(
     always @(posedge clk or posedge res) begin
         if (res == 1)
             PC <= 0;
-        else begin
-            PC <= PCSrc? PCJumpAddr : PC + 4;
+        else if (PCWrite == 1'b1) begin
+            PC <= PCSrc ? PCJumpAddr : PC + 4;
         end
     end
 
