@@ -30,6 +30,7 @@ module IF(
     wire [31:0] data_in;
     assign data_in = 32'b0;
     memory instr_mem(
+        .clk(clk),
         .addr_in(PC),
         .data_in(data_in),
         .data_out(instruction),
@@ -53,10 +54,9 @@ module IF(
         end
     end
 
-    // TODO: Check if this is correct?
     always @(PC or instruction) begin
-        dout[63:32] <= PC;
-        dout[31:0]  <= instruction;
+        dout[63:32] = PC;
+        dout[31:0]  = instruction;
     end
     
 

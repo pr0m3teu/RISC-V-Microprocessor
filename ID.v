@@ -11,6 +11,7 @@ module ID(
 );
     input res;
     input RegWrite;
+
     input [31:0] input_instr;
     input [31:0] write_data;
     input [4:0]  write_dest;
@@ -32,6 +33,7 @@ module ID(
         .out_reg1(dout[95:64]),
         .out_reg2(dout[63:32]),
         .RegWrite(RegWrite),
+        .clk(clk),
         .res(res)
     );
     
@@ -40,4 +42,5 @@ module ID(
         .imm32(dout[31:0])
     );
 
+    
 endmodule

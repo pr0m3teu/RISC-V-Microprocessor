@@ -1,6 +1,7 @@
 // Register file module 
 
 module registers(
+   clk,
    res,
    rreg1,
    rreg2,
@@ -38,16 +39,16 @@ module registers(
     end
 
     integer i;
-    always @(*) begin
+    always @(posedge clk or posedge res) begin
         if (res) begin
-            for (i = 0; i < REG_COUNT; i++) begin 
-                regs[i] = 32'b0; // TODO: Unhardcode this value
-            end
+            for (i = 0; i < REG_COUNT; i = i + 1)
+                regs[i] <= 32'b0;
+
+        end else begin
+            if (RegWrite && wreg != 5'b0)
+                regs[wreg] <= wdata;
+            regs[0] <= 32'b0;
         end
-
-        regs[0] <= 32'b0; // Maybe this is redundant
-        if (RegWrite && wreg != 5'b0)
-            regs[wreg] <= wdata;
-
     end
+
 endmodule

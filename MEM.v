@@ -2,12 +2,14 @@
 // it sees it twice, causing a compilation error
 
 module MEM(
+    clk,
     din,
     dout,
     MemRead,
     MemWrite
 );
 
+    input clk;
     // Write reg   = 101:97;
     // Zero        = 96;
     // New PC      = 95:64;
@@ -23,6 +25,7 @@ module MEM(
     input MemWrite, MemRead;
 
     memory data_mem(
+       .clk(clk),
        .addr_in(din[63:32]),
        .data_in(din[31:0]),
        .data_out(dout[63:32]),
