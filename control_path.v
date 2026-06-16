@@ -31,4 +31,4 @@ module ControlPath(
         endcase
     end
 
-endmodule;
+endmodule

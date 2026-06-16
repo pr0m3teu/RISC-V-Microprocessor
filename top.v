@@ -100,7 +100,7 @@ module top(
     // ALU Control unit
     reg [3:0] ALUControl;
     reg [6:0] funct7;
-    always @(posedge clk or ALUOp or ID_EX_INSTR[14:12] or ID_EX_INSTR[31:25]) begin
+    always @(*) begin
 
         // TODO: Extend logic to check funct3 as well for more complex instr
         case(ID_EX_INSTR[6:0])
@@ -161,6 +161,7 @@ module top(
 
     wire [68:0] MEM_out;
     MEM mem_stage(
+        .clk(clk),
         .din(EX_MEM_REG),
         .dout(MEM_out),
         .MemWrite(MemWrite),

@@ -7,7 +7,7 @@ module EX(
     din,
     dout,
     ALUSrc,
-    ALUControl,
+    ALUControl
 );
 
     input clk, res;
