@@ -1,8 +1,9 @@
-module memory(addr_in, data_in, data_out, MemWrite, MemRead);
+module memory(clk, addr_in, data_in, data_out, MemWrite, MemRead);
     parameter WIDTH = 8;
     parameter ADDR_WIDTH = 10;
     parameter WORD = 32;
 
+    input clk;
     input MemWrite;
     input MemRead; 
     input [WORD-1:0] addr_in;
@@ -11,6 +12,7 @@ module memory(addr_in, data_in, data_out, MemWrite, MemRead);
     output reg [WORD-1:0] data_out;
 
     reg [WIDTH-1:0] mem [0:(1 << ADDR_WIDTH) - 1];
+
 
     // synchronous writes
     always @(posedge clk) begin
